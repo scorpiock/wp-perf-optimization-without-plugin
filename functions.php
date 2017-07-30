@@ -43,3 +43,32 @@ function deregister_qjuery() {
     }
 }  
 add_action('wp_enqueue_scripts', 'deregister_qjuery'); 
+
+// Disable Self Pingback
+function disable_pingback( &$links ) {
+  foreach ( $links as $l => $link )
+        if ( 0 === strpos( $link, get_option( 'home' ) ) )
+            unset($links[$l]);
+}
+
+add_action( 'pre_ping', 'disable_pingback' );
+
+// Disable Heartbeat
+add_action( 'init', 'stop_heartbeat', 1 );
+function stop_heartbeat() {
+wp_deregister_script('heartbeat');
+}
+
+// Disable Dashicons in Front-end
+function wpdocs_dequeue_dashicon() {
+	if (current_user_can( 'update_core' )) {
+	    return;
+	}
+	wp_deregister_style('dashicons');
+}
+add_action( 'wp_enqueue_scripts', 'wpdocs_dequeue_dashicon' );
+
+// Disable Contact Form 7 CSS/JS on Every Page
+add_filter( 'wpcf7_load_js', '__return_false' );
+add_filter( 'wpcf7_load_css', '__return_false' );
+
